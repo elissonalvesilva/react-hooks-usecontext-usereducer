@@ -1,68 +1,262 @@
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# React Hooks Using useContext and useReducer
 
-## Available Scripts
+## First steps
 
-In the project directory, you can run:
+### Setup
+ - Run the command bellow to install dependences
+> yarn
 
-### `yarn start`
+ - Run the command bellow to start application
+> yarn start
 
-Runs the app in the development mode.<br />
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Examples
 
-The page will reload if you make edits.<br />
-You will also see any lint errors in the console.
+## 1 - Using useContext to pass a userName to child component
 
-### `yarn test`
+**useContext.js**
+```javascript
 
-Launches the test runner in the interactive watch mode.<br />
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+import { createContext } from 'react';
 
-### `yarn build`
+const UserContext = createContext();
 
-Builds the app for production to the `build` folder.<br />
-It correctly bundles React in production mode and optimizes the build for the best performance.
+const UserProvider = UserContext.Provider;
 
-The build is minified and the filenames include the hashes.<br />
-Your app is ready to be deployed!
+const UserConsumer = UserContext.Consumer;
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+export { UserProvider, UserConsumer };
 
-### `yarn eject`
+```
+**User.js** - is a Parent Component
+```javascript
+import React from 'react';
+import { UserProvider } from '../contexts/UserContext';
+import UserName from './UserName';
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+function User() {
+  return (
+    <UserProvider value="Elisson Silva">
+      <UserName />
+    </UserProvider>
+  );
+}
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+export default User;
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+```
+**Username.js** - is a Child Component
+```javascript
+iimport React from 'react';
+import { UserConsumer } from '../contexts/UserContext';
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-## Learn More
+function UserName() {
+  return (
+    <UserConsumer>
+      {
+        (username) => (
+          <h1> {username} </h1>
+        )
+      }
+    </UserConsumer>
+  );
+}
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+export default UserName;
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```
 
-### Code Splitting
+## 2 - using CreateContext and useContext to pass a state to child component
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+**EmployeeContext.js**
+```javascript
 
-### Analyzing the Bundle Size
+import { createContext } from 'react';
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+const EmployeeContext = createContext();
 
-### Making a Progressive Web App
+const EmployeeProvider = EmployeeContext.Provider;
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+export { EmployeeContext, EmployeeProvider };
 
-### Advanced Configuration
+```
+**Employee.js** - is a Parent Component
+```javascript
+import React, { useState } from 'react';
+import { EmployeeProvider } from '../contexts/EmployeeContext';
+import EmployeeDetails from './EmployeeDetails';
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+function Employee() {
 
-### Deployment
+  const [employee, setEmployee] = useState({
+    id: 45,
+    name: 'Elisson',
+    salary: 8534.45,
+    age: 25
+  });
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+  return (
+    <EmployeeProvider value={employee}>
+      <EmployeeDetails />
+    </EmployeeProvider>
+  );
+}
 
-### `yarn build` fails to minify
+export default Employee;
 
-This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify
+```
+**EmployeeDetails.js** - is a Child Component
+```javascript
+import React, { useContext } from 'react';
+import { EmployeeContext } from '../contexts/EmployeeContext';
+
+
+function EmployeeDetails() {
+
+  const context = useContext(EmployeeContext);
+
+  return (
+    <div>
+      <div>
+          <p>id: {context.id}</p>
+          <p>Name: {context.name}</p>
+          <p>Salaray: {context.salary}</p>
+          <p>Age: {context.age}</p>
+      </div>  
+    </div>
+  );
+}
+
+export default EmployeeDetails;
+
+```
+
+## 3 - using CreateContext and useContext to pass a state to child component and calculate a salary
+
+**SalaryContext.js**
+```javascript
+
+import { createContext } from 'react';
+
+const SalaryContext = createContext();
+
+const SalaryProvider = SalaryContext.Provider;
+
+export {
+  SalaryContext,
+  SalaryProvider,
+};
+
+
+```
+**Salary.js** - is a Parent Component
+```javascript
+iimport React, { useState } from 'react';
+import { SalaryProvider } from '../contexts/SalaryContext';
+import SalaryDiscount from './SalaryDiscount';
+
+function Salary() {
+
+  const [total, setTotal] = useState(0.0);
+  const [baseSalary, setBaseSalary] = useState(0.0);
+  const [otherDiscounts, setOtherDiscounts] = useState(0.0);
+
+  const calculateSalary = (base, others) => {
+    return base - others;
+  };
+
+  const providerValue = {
+    totalResult: [total, setTotal],
+    salary: [baseSalary, setBaseSalary, calculateSalary],
+    othersDiscounts: [otherDiscounts, setOtherDiscounts]
+  };
+
+  return (
+    <SalaryProvider value={providerValue}>
+      <SalaryDiscount />
+    </SalaryProvider>
+  );
+}
+
+export default Salary;
+
+```
+**SalaryDiscount.js** - is a Child Component
+```javascript
+import React, { useContext } from 'react';
+import { SalaryContext } from '../contexts/SalaryContext';
+
+function SalaryDiscount() {
+  const { salary, othersDiscounts, totalResult } = useContext(SalaryContext);
+  const [baseSalary, setBaseSalary, calculateSalary] = salary;
+  const [otherDiscounts, setOtherDiscounts] = othersDiscounts;
+  const [total, setTotal] = totalResult;
+  
+  const calculate = () => {
+    const result = calculateSalary(baseSalary, otherDiscounts);
+    setTotal(result);
+  };
+  
+  return (
+    <div>
+      <div>
+        {
+          total && (
+            <h1>
+              { total }
+            </h1>
+          )
+        }
+      </div>
+      <div>
+        <input type="text" onChange={(e) => setBaseSalary(e.target.value)}/>
+        <input type="text" onChange={(e) => setOtherDiscounts(e.target.value)}/>
+        <button onClick={calculate}>Calculate</button>
+      </div>
+    </div>
+  );
+}
+
+export default SalaryDiscount;
+
+```
+
+## 4 - using useReducer to multiples counters
+
+```javascript
+import React, { useReducer } from 'react';
+
+const initialState = 0;
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'increment': return state + 1;
+    case 'decrement': return state - 1;
+    case 'set': return action.count;
+    default: throw new Error('Unexpected action');
+  }
+};
+
+function Count() {
+  const [count1, dispatch1] = useReducer(reducer, initialState);
+  const [count2, dispatch2] = useReducer(reducer, initialState);
+  return (
+    <>
+      <div>
+        {count1}
+        <button onClick={() => dispatch1({ type: 'increment' })}>+1</button>
+        <button onClick={() => dispatch1({ type: 'decrement' })}>-1</button>
+        <button onClick={() => dispatch1({ type: 'set', count: 0 })}>reset</button>
+      </div>
+      <div>
+        {count2}
+        <button onClick={() => dispatch2({ type: 'increment' })}>+1</button>
+        <button onClick={() => dispatch2({ type: 'decrement' })}>-1</button>
+        <button onClick={() => dispatch2({ type: 'set', count: 0 })}>reset</button>
+      </div>
+    </>
+  );
+}
+
+export default Count;
+
+```
